@@ -39,3 +39,6 @@ __pycache__/
 
 # OS
 Thumbs.db
+
+# Optional local workspace (clones, experiments — not part of the app)
+/local-dev/
