@@ -1,0 +1,202 @@
+//@version=6
+// BPTrade - Buffet Patience Trade
+// Mode-based: Cryptocurrency | Indices | Commodities | Forex. Wrong mode = no matching logic.
+// Names: Value (strong long), Discount (long), Fade (short), Overheat (strong short).
+// Min N bars between emitted signals (labels + alerts).
+
+indicator("BPTrade - Buffet Patience Trade", shorttitle="BPTrade", overlay=true, max_labels_count=500, dynamic_requests=false)
+
+// =============================================================================
+// INPUTS
+// =============================================================================
+group_mode = "Asset mode (required)"
+assetMode = input.string("Cryptocurrency", "Mode", options=["Cryptocurrency", "Indices", "Commodities", "Forex"], group=group_mode, tooltip="Must match instrument class: e.g. BTC→Crypto, NQ→Indices, XAU→Commodities, EURUSD→Forex.")
+
+group_rsi = "RSI Settings"
+rsiLen = input.int(14, "RSI Length", minval=2, group=group_rsi)
+rsiSource = input.source(close, "RSI Source", group=group_rsi)
+
+group_ema = "EMA periods"
+ema20Len = input.int(20, "EMA 20", minval=2, maxval=500, group=group_ema, tooltip="Red.")
+ema50Len = input.int(50, "EMA 50", minval=2, maxval=500, group=group_ema, tooltip="Orange.")
+ema100Len = input.int(100, "EMA 100", minval=2, maxval=500, group=group_ema, tooltip="Aqua.")
+ema200Len = input.int(200, "EMA 200", minval=2, maxval=500, group=group_ema, tooltip="Blue.")
+
+group_visual = "Visual Settings"
+signalCooldownBars = input.int(10, "Min bars between signals", minval=1, maxval=100, group=group_visual, tooltip="After a signal on bar B, next signal earliest on bar B + this count. Default 10.")
+showTable = input.bool(true, "Show Dashboard Table", group=group_visual)
+showLabels = input.bool(true, "Signal labels (Value / Discount / Fade / Overheat)", group=group_visual)
+showFourEmas = input.bool(true, "Show EMA plots", group=group_visual)
+
+// =============================================================================
+// Tier: 2 Value, 1 Discount, -1 Fade, -2 Overheat, 0 = none
+// =============================================================================
+tierToDisplayText(tv) =>
+    if tv == 2
+        "Value"
+    else if tv == 1
+        "Discount"
+    else if tv == -2
+        "Overheat"
+    else if tv == -1
+        "Fade"
+    else
+        ""
+
+signalAccentForTier(tv) =>
+    if tv == 2
+        color.new(#1B5E20, 15)
+    else if tv == 1
+        color.new(#2E7D32, 35)
+    else if tv == -1
+        color.new(#E53935, 35)
+    else if tv == -2
+        color.new(#B71C1C, 15)
+    else
+        color.new(color.gray, 35)
+
+signalLabelBgForTier(tv) =>
+    if tv == 2
+        color.new(#1B5E20, 10)
+    else if tv == 1
+        color.new(#43A047, 10)
+    else if tv == -1
+        color.new(#E53935, 10)
+    else if tv == -2
+        color.new(#B71C1C, 10)
+    else
+        color.new(color.gray, 15)
+
+signalLabelTextColorForTier(tv) =>
+    tv == 0 ? color.black : color.white
+
+// Rules per mode. Buys: compare candle low to EMA × (1 − p/100). Sells: high to EMA × (1 + p/100).
+// Precedence: Value > Discount; Overheat > Fade (mutually exclusive branches).
+modeSignalTier(m, rsiV, e20, e50, e100, e200) =>
+    t = 0
+    if m == "Cryptocurrency"
+        if not na(e100) and low < e100 * (1.0 - 10.0 / 100.0) and rsiV < 30
+            t := 2
+        else if not na(e50) and low < e50 * (1.0 - 5.0 / 100.0) and rsiV < 40
+            t := 1
+        else if not na(e200) and high > e200 * (1.0 + 20.0 / 100.0) and rsiV > 70
+            t := -2
+        else if not na(e100) and high > e100 * (1.0 + 10.0 / 100.0) and rsiV > 60
+            t := -1
+    else if m == "Indices"
+        if not na(e100) and low < e100 * (1.0 - 8.0 / 100.0) and rsiV < 30
+            t := 2
+        else if not na(e20) and low < e20 * (1.0 - 2.0 / 100.0) and rsiV < 40
+            t := 1
+        else if not na(e100) and high > e100 * (1.0 + 8.0 / 100.0) and rsiV > 70
+            t := -2
+        else if not na(e50) and high > e50 * (1.0 + 4.0 / 100.0) and rsiV > 60
+            t := -1
+    else if m == "Commodities"
+        if not na(e100) and low < e100 * (1.0 - 6.0 / 100.0) and rsiV < 30
+            t := 2
+        else if not na(e100) and low < e100 * (1.0 - 3.0 / 100.0) and rsiV < 40
+            t := 1
+        else if not na(e100) and high > e100 * (1.0 + 8.0 / 100.0) and rsiV > 70
+            t := -2
+        else if not na(e100) and high > e100 * (1.0 + 4.0 / 100.0) and rsiV > 60
+            t := -1
+    else if m == "Forex"
+        if not na(e100) and low < e100 * (1.0 - 4.0 / 100.0) and rsiV < 30
+            t := 2
+        else if not na(e50) and low < e50 * (1.0 - 1.25 / 100.0) and rsiV < 40
+            t := 1
+        else if not na(e100) and high > e100 * (1.0 + 5.0 / 100.0) and rsiV > 70
+            t := -2
+        else if not na(e50) and high > e50 * (1.0 + 2.5 / 100.0) and rsiV > 60
+            t := -1
+    t
+
+is1D = timeframe.period == "1D"
+is1W = timeframe.period == "1W"
+chartTfOk = is1D or is1W
+
+ema20 = ta.ema(close, ema20Len)
+ema50 = ta.ema(close, ema50Len)
+ema100 = ta.ema(close, ema100Len)
+ema200 = ta.ema(close, ema200Len)
+
+rsi = ta.rsi(rsiSource, rsiLen)
+
+rawTier = modeSignalTier(assetMode, rsi, ema20, ema50, ema100, ema200)
+rawReady = chartTfOk and barstate.isconfirmed and rawTier != 0
+
+var int lastSignalBar = na
+cooldownOk = na(lastSignalBar) or (bar_index - lastSignalBar >= signalCooldownBars)
+signalFires = rawReady and cooldownOk
+signalTier = signalFires ? rawTier : 0
+
+if signalFires
+    lastSignalBar := bar_index
+
+sigValue = signalFires and signalTier == 2
+sigDiscount = signalFires and signalTier == 1
+sigOverheat = signalFires and signalTier == -2
+sigFade = signalFires and signalTier == -1
+
+signalText = tierToDisplayText(signalTier)
+
+// =============================================================================
+// PLOTS
+// =============================================================================
+plot(showFourEmas ? ema20 : na, title="EMA 20", style=plot.style_line, linewidth=2, color=color.red)
+plot(showFourEmas ? ema50 : na, title="EMA 50", style=plot.style_line, linewidth=2, color=color.orange)
+plot(showFourEmas ? ema100 : na, title="EMA 100", style=plot.style_line, linewidth=2, color=color.aqua)
+plot(showFourEmas ? ema200 : na, title="EMA 200", style=plot.style_line, linewidth=2, color=color.blue)
+
+// =============================================================================
+// LABELS — confirmed bar, at low (long) / high (short)
+// =============================================================================
+if showLabels and signalFires and signalText != ""
+    bull = signalTier > 0
+    lblStyle = bull ? label.style_label_up : label.style_label_down
+    yPrice = bull ? low : high
+    label.new(bar_index, yPrice, signalText, xloc=xloc.bar_index, yloc=yloc.price, style=lblStyle, textcolor=signalLabelTextColorForTier(signalTier), color=signalLabelBgForTier(signalTier))
+
+// =============================================================================
+// DASHBOARD
+// =============================================================================
+var table dash = table.new(position.top_right, 2, 10, border_width=1)
+hdrBg = color.new(color.black, 0)
+cellBg = color.new(color.black, 40)
+tfHint = chartTfOk ? "1D or 1W — OK" : "Use 1D or 1W"
+modeHint = "Pick mode for symbol: Crypto · Indices · Commodity · FX (settings)"
+tableAccentTier = signalTier == 0 ? 0 : signalTier
+tableAccent = signalAccentForTier(tableAccentTier)
+
+if showTable and barstate.islast
+    table.cell(dash, 0, 0, "BPTrade", text_color=color.white, bgcolor=hdrBg)
+    table.cell(dash, 1, 0, "", bgcolor=tableAccent)
+    table.cell(dash, 0, 1, "Chart", text_color=color.white, bgcolor=hdrBg)
+    table.cell(dash, 1, 1, tfHint, text_color=chartTfOk ? color.lime : color.orange, bgcolor=cellBg)
+    table.cell(dash, 0, 2, "Asset mode", text_color=color.white, bgcolor=hdrBg)
+    table.cell(dash, 1, 2, assetMode, text_color=color.new(#81D4FA, 0), bgcolor=cellBg)
+    table.cell(dash, 0, 3, "Mode note", text_color=color.white, bgcolor=hdrBg)
+    table.cell(dash, 1, 3, modeHint, text_color=color.new(#B0BEC5, 0), bgcolor=cellBg)
+    table.cell(dash, 0, 4, "RSI (" + str.tostring(rsiLen) + ")", text_color=color.white, bgcolor=hdrBg)
+    table.cell(dash, 1, 4, str.tostring(rsi, "#.##"), text_color=color.white, bgcolor=cellBg)
+    table.cell(dash, 0, 5, "EMA " + str.tostring(ema20Len), text_color=color.white, bgcolor=hdrBg)
+    table.cell(dash, 1, 5, str.tostring(ema20, format.mintick), text_color=color.red, bgcolor=cellBg)
+    table.cell(dash, 0, 6, "EMA " + str.tostring(ema50Len), text_color=color.white, bgcolor=hdrBg)
+    table.cell(dash, 1, 6, str.tostring(ema50, format.mintick), text_color=color.orange, bgcolor=cellBg)
+    table.cell(dash, 0, 7, "EMA " + str.tostring(ema100Len), text_color=color.white, bgcolor=hdrBg)
+    table.cell(dash, 1, 7, str.tostring(ema100, format.mintick), text_color=color.aqua, bgcolor=cellBg)
+    table.cell(dash, 0, 8, "EMA " + str.tostring(ema200Len), text_color=color.white, bgcolor=hdrBg)
+    table.cell(dash, 1, 8, str.tostring(ema200, format.mintick), text_color=color.blue, bgcolor=cellBg)
+    table.cell(dash, 0, 9, "Signal", text_color=color.white, bgcolor=hdrBg)
+    tierCellBg = signalTier != 0 ? signalLabelBgForTier(signalTier) : cellBg
+    tierCellFg = signalTier != 0 ? signalLabelTextColorForTier(signalTier) : color.white
+    table.cell(dash, 1, 9, signalText != "" ? signalText : "—", text_color=tierCellFg, bgcolor=tierCellBg)
+
+// =============================================================================
+// ALERTS (1D/1W + confirmed bar + mode rule + cooldown)
+// =============================================================================
+alertcondition(sigValue, title="BPTrade Value", message='{"system":"BPTrade","signal":"VALUE","ticker":"{{ticker}}","price":"{{close}}","time":"{{time}}"}')
+alertcondition(sigDiscount, title="BPTrade Discount", message='{"system":"BPTrade","signal":"DISCOUNT","ticker":"{{ticker}}","price":"{{close}}","time":"{{time}}"}')
+alertcondition(sigFade, title="BPTrade Fade", message='{"system":"BPTrade","signal":"FADE","ticker":"{{ticker}}","price":"{{close}}","time":"{{time}}"}')
+alertcondition(sigOverheat, title="BPTrade Overheat", message='{"system":"BPTrade","signal":"OVERHEAT","ticker":"{{ticker}}","price":"{{close}}","time":"{{time}}"}')
