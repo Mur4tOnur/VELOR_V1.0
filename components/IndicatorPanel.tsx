@@ -14,15 +14,18 @@ import { defaultPair, MARKETS, PAIRS_BY_MARKET, type Market } from "@/lib/market
 import { buildMockCandles } from "@/lib/mockCandles";
 import { SIGNAL_META, type VelorSignal } from "@/lib/signals";
 
+/** Short-tier markers: same purple as OVERHEAT (not amber/orange). */
+const SHORT_MARKER_COLOR = "#c084fc";
+
 function markerStyle(signal: string): {
   position: "belowBar" | "aboveBar";
   color: string;
   shape: "arrowUp" | "arrowDown";
 } {
   if (signal === "VALUE" || signal === "DISCOUNT") {
-    return { position: "belowBar", color: "#22c55e", shape: "arrowUp" };
+    return { position: "belowBar", color: "#34d399", shape: "arrowUp" };
   }
-  return { position: "aboveBar", color: "#f87171", shape: "arrowDown" };
+  return { position: "aboveBar", color: SHORT_MARKER_COLOR, shape: "arrowDown" };
 }
 
 type Props = {
@@ -52,25 +55,25 @@ export function IndicatorPanel({ showHide, onHide }: Props) {
 
     const chart = createChart(el, {
       layout: {
-        background: { type: ColorType.Solid, color: "#141419" },
-        textColor: "#9ca3af",
+        background: { type: ColorType.Solid, color: "#08080a" },
+        textColor: "#a1a1aa",
       },
       grid: {
-        vertLines: { color: "#2a2a32" },
-        horzLines: { color: "#2a2a32" },
+        vertLines: { color: "rgba(255,255,255,0.04)" },
+        horzLines: { color: "rgba(255,255,255,0.04)" },
       },
-      rightPriceScale: { borderColor: "#2a2a32" },
-      timeScale: { borderColor: "#2a2a32" },
+      rightPriceScale: { borderColor: "rgba(255,255,255,0.06)" },
+      timeScale: { borderColor: "rgba(255,255,255,0.06)" },
       width: el.clientWidth,
       height: 360,
     });
 
     const series = chart.addSeries(CandlestickSeries, {
-      upColor: "#22c55e",
-      downColor: "#ef4444",
+      upColor: "#34d399",
+      downColor: "#818cf8",
       borderVisible: false,
-      wickUpColor: "#22c55e",
-      wickDownColor: "#ef4444",
+      wickUpColor: "#6ee7b7",
+      wickDownColor: "#a5b4fc",
     });
     seriesRef.current = series;
     series.setData(candles);
@@ -117,7 +120,7 @@ export function IndicatorPanel({ showHide, onHide }: Props) {
           <select
             value={market}
             onChange={(e) => onMarketPick(e.target.value as Market)}
-            className="rounded-md border border-[var(--border)] bg-[#0c0c0f] px-2 py-1.5 text-sm text-white"
+            className="velor-select"
           >
             {MARKETS.map((m) => (
               <option key={m} value={m}>
@@ -142,26 +145,28 @@ export function IndicatorPanel({ showHide, onHide }: Props) {
         </label>
       </div>
 
-      <div ref={containerRef} className="w-full min-h-[360px]" />
+      <div
+        ref={containerRef}
+        className="min-h-[260px] w-full max-w-full min-w-0 overflow-hidden rounded-xl bg-black/50 ring-1 ring-inset ring-white/[0.06] sm:min-h-[360px]"
+      />
 
-      <div className="mt-3 grid gap-2 border-t border-[var(--border)] pt-3 text-xs sm:grid-cols-2">
+      <div className="mt-4 grid gap-2 border-t border-white/[0.06] pt-4 text-xs sm:grid-cols-2">
         <div className="text-[var(--muted)]">
           <span className="text-white">distancePct</span> (mock vs EMA):{" "}
-          <span className="font-mono text-emerald-300">{distancePct}%</span>
+          <span className="velor-text-glow-green font-mono text-emerald-300">{distancePct}%</span>
         </div>
         <ul className="flex flex-wrap gap-2">
-          {(Object.keys(SIGNAL_META) as VelorSignal[]).map((k) => (
-            <li
-              key={k}
-              className={`rounded px-2 py-0.5 font-mono text-[10px] ${
-                SIGNAL_META[k].tone === "long"
-                  ? "bg-emerald-950/60 text-emerald-300"
-                  : "bg-red-950/60 text-red-300"
-              }`}
-            >
-              {k}
-            </li>
-          ))}
+          {(Object.keys(SIGNAL_META) as VelorSignal[]).map((k) => {
+            const pillClass =
+              SIGNAL_META[k].tone === "long"
+                ? "bg-emerald-950/40 text-emerald-300 ring-emerald-500/20 shadow-[0_0_16px_-6px_rgba(52,211,153,0.45)]"
+                : "bg-violet-950/35 text-violet-200 ring-violet-400/25 shadow-[0_0_16px_-6px_rgba(167,139,250,0.35)]";
+            return (
+              <li key={k} className={`rounded-md px-2 py-0.5 font-mono text-[10px] ring-1 ${pillClass}`}>
+                {k}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </WidgetFrame>

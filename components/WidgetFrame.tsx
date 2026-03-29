@@ -11,12 +11,12 @@ type WidgetFrameProps = {
 
 export function WidgetFrame({ title, subtitle, children, onHide, showHide }: WidgetFrameProps) {
   return (
-    <section className="relative rounded-xl border border-[var(--border)] bg-[var(--panel)] p-4 shadow-sm">
+    <section className="velor-glass-card relative min-w-0 p-5">
       {showHide && onHide && (
         <button
           type="button"
           onClick={onHide}
-          className="absolute right-2 top-2 z-10 rounded-md border border-[var(--border)] bg-[#0c0c0f]/90 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-[var(--muted)] hover:border-zinc-500 hover:text-white"
+          className="absolute right-3 top-3 z-10 rounded-lg border border-white/10 bg-black/50 px-2 py-1 text-[10px] font-medium uppercase tracking-wide text-zinc-400 backdrop-blur-sm transition-colors hover:border-white/20 hover:text-white"
           title="Hide from overview"
         >
           Hide
@@ -26,7 +26,7 @@ export function WidgetFrame({ title, subtitle, children, onHide, showHide }: Wid
         <h2 className="text-sm font-semibold tracking-tight text-white">{title}</h2>
         {subtitle ? <p className="mt-1 text-xs text-[var(--muted)]">{subtitle}</p> : null}
       </div>
-      <div className="mt-3">{children}</div>
+      <div className="mt-4">{children}</div>
     </section>
   );
 }

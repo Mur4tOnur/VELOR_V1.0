@@ -6,7 +6,9 @@
 
 ## Dashboard layout
 
-Overview widget visibility is client state only (no persistence). Indicator **room** stacks the mock liquidation heat map under the chart to mirror the overview column flow.
+Overview widget visibility is client state only (no persistence). **Indicator** and **Liquidation** are separate rooms (chart-only vs heat map). **Positions** is not a nav room: it is a full-width `lg:col-span-3` row at the bottom of the Overview grid, and the same `PositionsWidget` is stacked under **Portfolio** in the Portfolio room.
+
+Product label in the shell header is **VELOR** (temporary monogram SVG in `VelorLogo.tsx`). Short-tier chart markers (FADE, OVERHEAT) share one purple (`SHORT_MARKER_COLOR` in `IndicatorPanel.tsx`).
 
 ## lightweight-charts + Webpack / SSR
 

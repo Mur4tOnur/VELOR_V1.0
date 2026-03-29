@@ -41,7 +41,7 @@ export function FearGreedWidget({ onHide, showHide }: Props) {
         <select
           value={market}
           onChange={(e) => setMarket(e.target.value as Market)}
-          className="w-full max-w-xs rounded-md border border-[var(--border)] bg-[#0c0c0f] px-2 py-1.5 text-sm text-white"
+          className="velor-select w-full max-w-xs"
         >
           {MARKETS.map((m) => (
             <option key={m} value={m}>
@@ -51,14 +51,16 @@ export function FearGreedWidget({ onHide, showHide }: Props) {
         </select>
       </label>
       <div className="flex items-end gap-3">
-        <span className="text-5xl font-semibold tabular-nums tracking-tight text-white">{score}</span>
-        <span className="mb-1 rounded-md bg-amber-500/15 px-2 py-1 text-sm font-medium text-amber-300">
+        <span className="text-5xl font-semibold tabular-nums tracking-tight text-white drop-shadow-[0_0_24px_rgba(255,255,255,0.12)]">
+          {score}
+        </span>
+        <span className="mb-1 rounded-lg border border-amber-500/25 bg-amber-500/10 px-2 py-1 text-sm font-medium text-amber-200/90 backdrop-blur-sm">
           {label}
         </span>
       </div>
-      <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-[#0c0c0f]">
+      <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-black/50 ring-1 ring-inset ring-white/[0.06]">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-emerald-600 via-yellow-500 to-rose-600"
+          className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-amber-400 to-violet-500 shadow-[0_0_12px_rgba(52,211,153,0.4)]"
           style={{ width: `${score}%` }}
         />
       </div>

@@ -4,9 +4,10 @@ import { WidgetFrame } from "@/components/WidgetFrame";
 import { SAMPLE_ALERTS, SIGNAL_META, type VelorSignal } from "@/lib/signals";
 
 function badgeClass(signal: VelorSignal) {
-  return SIGNAL_META[signal].tone === "long"
-    ? "bg-emerald-950/70 text-emerald-300 ring-emerald-800/50"
-    : "bg-red-950/70 text-red-300 ring-red-800/50";
+  if (SIGNAL_META[signal].tone === "long") {
+    return "bg-emerald-950/50 text-emerald-300 ring-emerald-500/30 shadow-[0_0_12px_-4px_rgba(52,211,153,0.4)]";
+  }
+  return "bg-violet-950/45 text-violet-200 ring-violet-400/30 shadow-[0_0_12px_-4px_rgba(167,139,250,0.35)]";
 }
 
 type Props = {
@@ -26,7 +27,7 @@ export function SmartAlerts({ onHide, showHide }: Props) {
         {SAMPLE_ALERTS.map((a) => (
           <li
             key={a.id}
-            className="flex items-center justify-between gap-2 rounded-lg border border-[var(--border)] bg-[#0c0c0f]/80 px-3 py-2 text-sm"
+            className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.06] bg-black/35 px-3 py-2 text-sm backdrop-blur-sm transition-colors hover:border-white/10 hover:bg-black/45"
           >
             <span className="font-mono text-white">{a.symbol}</span>
             <span className={`rounded-md px-2 py-0.5 text-xs font-medium ring-1 ${badgeClass(a.signal)}`}>

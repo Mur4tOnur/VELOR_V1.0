@@ -58,7 +58,7 @@ export function LiquidationHeatMap({ onHide, showHide }: Props) {
           <select
             value={market}
             onChange={(e) => onMarketPick(e.target.value as Market)}
-            className="rounded-md border border-[var(--border)] bg-[#0c0c0f] px-2 py-1.5 text-sm text-white"
+            className="velor-select"
           >
             {MARKETS.map((m) => (
               <option key={m} value={m}>
@@ -84,15 +84,15 @@ export function LiquidationHeatMap({ onHide, showHide }: Props) {
       </div>
 
       <div
-        className="grid gap-px rounded-lg border border-[var(--border)] bg-[var(--border)] p-px"
+        className="grid gap-px rounded-xl border border-white/10 bg-black/40 p-px ring-1 ring-inset ring-white/[0.04]"
         style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
       >
         {cells.map(({ key, intensity }) => {
           const isLong = intensity > 0.52;
-          const alpha = 0.15 + intensity * 0.75;
+          const alpha = 0.2 + intensity * 0.7;
           const bg = isLong
-            ? `rgba(34, 197, 94, ${alpha})`
-            : `rgba(239, 68, 68, ${alpha})`;
+            ? `rgba(52, 211, 153, ${alpha})`
+            : `rgba(251, 146, 60, ${alpha})`;
           return <div key={key} className="aspect-square min-h-[14px] rounded-[2px]" style={{ backgroundColor: bg }} />;
         })}
       </div>

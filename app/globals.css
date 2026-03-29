@@ -3,13 +3,52 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0c0c0f;
-  --panel: #141419;
-  --border: #2a2a32;
+  --bg: #000000;
+  --panel: rgba(18, 18, 22, 0.55);
+  --panel-solid: #121216;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
   --muted: #8b8b9a;
+  --accent-violet: rgba(139, 92, 246, 0.35);
+  --glow-green: rgba(52, 211, 153, 0.45);
 }
 
 body {
   background: var(--bg);
   color: #e8e8ed;
+}
+
+@layer components {
+  .velor-glass-hud {
+    @apply border-white/[0.08] bg-zinc-900/40 backdrop-blur-xl;
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .velor-glass-card {
+    @apply rounded-2xl border border-white/[0.08] bg-zinc-900/35 backdrop-blur-xl;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.4),
+      0 24px 48px -24px rgba(0, 0, 0, 0.9),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .velor-select {
+    @apply rounded-lg border border-white/10 bg-black/45 px-2 py-1.5 text-sm text-white shadow-inner backdrop-blur-md transition-colors;
+    @apply focus:border-violet-500/40 focus:outline-none focus:ring-1 focus:ring-violet-500/25;
+  }
+
+  .velor-text-glow-green {
+    text-shadow: 0 0 20px rgba(52, 211, 153, 0.35);
+  }
+
+  .velor-nav-active {
+    @apply border-violet-500/35 bg-violet-950/45 text-white;
+    box-shadow:
+      0 0 28px -10px rgba(139, 92, 246, 0.45),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .velor-nav-idle {
+    @apply border border-transparent text-[var(--muted)] hover:bg-white/[0.04] hover:text-white;
+  }
 }
