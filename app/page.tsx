@@ -1,9 +1,15 @@
-import { DashboardShell } from "@/components/DashboardShell";
+import { Features } from "@/components/blocks/features-10";
+import { HowItWorks } from "@/components/blocks/how-it-works";
+import { TestimonialsSection } from "@/components/blocks/testimonials-section";
+import { HeroSection } from "@/components/HeroSection";
 
 export default function Home() {
   return (
-    <div className="h-full min-h-0">
-      <DashboardShell />
-    </div>
+    <main className="min-h-full bg-black text-white">
+      <HeroSection />
+      <Features />
+      <HowItWorks />
+      <TestimonialsSection />
+    </main>
   );
 }

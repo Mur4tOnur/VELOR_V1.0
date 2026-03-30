@@ -9,7 +9,13 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) for the dashboard.
+If you see a **ChunkLoadError** in dev (stale HMR chunks), stop the server and run **`npm run dev:clean`** (clears `.next` then starts dev), then hard-refresh the browser.
+
+Open [http://localhost:3000](http://localhost:3000) for the landing page; the app dashboard is at [http://localhost:3000/dashboard](http://localhost:3000/dashboard).
+
+## Landing hero
+
+The home page (`/`) is the full-viewport **landing hero** (`HeroSection`) and full-screen **menu** (MENU → white overlay); the trading UI lives at **`/dashboard`**. Set `NEXT_PUBLIC_SPLINE_SCENE_URL` to your Spline **public scene** URL (`…/scene.splinecode` → `@splinetool/react-spline`) or to any **embed page** URL (iframe). See `.env.example`.
 
 ## Stack
 
