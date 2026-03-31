@@ -39,6 +39,39 @@ const config: Config = {
         "glow-sm": "0 0 20px -5px rgba(52, 211, 153, 0.35)",
         "glow-violet": "0 0 28px -8px rgba(139, 92, 246, 0.4)",
       },
+      keyframes: {
+        velorIntroBlob1: {
+          "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
+          "40%": { transform: "translate(14%, -12%) scale(1.12)" },
+          "70%": { transform: "translate(-12%, 8%) scale(0.92)" },
+        },
+        velorIntroBlob2: {
+          "0%, 100%": { transform: "translate(0%, 0%) scale(1)" },
+          "35%": { transform: "translate(-18%, 14%) scale(1.08)" },
+          "65%": { transform: "translate(10%, -16%) scale(0.9)" },
+        },
+        velorIntroBlob3: {
+          "0%, 100%": { transform: "translate(-50%, -50%) scale(1)" },
+          "50%": { transform: "translate(-50%, -50%) scale(1.15) rotate(8deg)" },
+        },
+        velorIntroBand: {
+          "0%": { transform: "translateX(-120%) skewX(-14deg)", opacity: "0" },
+          "15%": { opacity: "0.55" },
+          "50%": { opacity: "0.35" },
+          "100%": { transform: "translateX(120%) skewX(-14deg)", opacity: "0" },
+        },
+        velorIntroShimmer: {
+          "0%": { backgroundPosition: "0% 50%" },
+          "100%": { backgroundPosition: "200% 50%" },
+        },
+      },
+      animation: {
+        "velor-intro-blob-1": "velorIntroBlob1 24s ease-in-out infinite",
+        "velor-intro-blob-2": "velorIntroBlob2 32s ease-in-out infinite",
+        "velor-intro-blob-3": "velorIntroBlob3 18s ease-in-out infinite",
+        "velor-intro-band": "velorIntroBand 14s ease-in-out infinite",
+        "velor-intro-shimmer": "velorIntroShimmer 12s linear infinite",
+      },
     },
   },
   plugins: [],

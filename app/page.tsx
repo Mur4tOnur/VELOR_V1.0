@@ -7,19 +7,23 @@ import { PricingSection } from "@/components/blocks/pricing-section";
 import { TestimonialsSection } from "@/components/blocks/testimonials-section";
 import { HeroSection } from "@/components/HeroSection";
 import { LandingHud } from "@/components/LandingHud";
+import { VelorIntro } from "@/components/VelorIntro";
 
 export default function Home() {
   return (
-    <main className="min-h-full bg-black text-white">
-      <LandingHud />
-      <HeroSection />
-      <Features />
-      <HowItWorks />
-      <TestimonialsSection />
-      <PricingSection />
-      <FAQSection />
-      <FinalCtaSection />
-      <FooterSection />
-    </main>
+    <>
+      <VelorIntro />
+      <main className="min-h-full bg-black text-white">
+        <LandingHud />
+        <HeroSection />
+        <Features />
+        <HowItWorks />
+        <TestimonialsSection />
+        <PricingSection />
+        <FAQSection />
+        <FinalCtaSection />
+        <FooterSection />
+      </main>
+    </>
   );
 }

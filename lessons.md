@@ -1,5 +1,11 @@
 # Lessons
 
+## Landing intro overlay (`VelorIntro.tsx`)
+
+Full-viewport intro sits above the landing (`z-[110]` > `LandingNavOverlay` `z-[100]`). **sessionStorage** key **`velor_intro_completed`** (`1`) skips intro for the rest of the browser session. **Hold-to-continue** uses **pointer capture** + **requestAnimationFrame** progress (~1.2–1.8s random per mount). **Escape** is **preventDefault** only (no dismiss). **AnimatePresence** drives exit (opacity + blur + scale); **`useLayoutEffect`** reads storage before paint to avoid a long wrong-state flash. **`prefers-reduced-motion`**: `useReducedMotion()` shortens exit and skips WebGL — static radial gradient only.
+
+Background (normal motion): **`components/ui/shader-lines.tsx`** — **Three.js r89** from CDN (`Intro_Animation.md` line shader), single script tag (`data-velor-three-shader`), **`ensureThreeLoaded`** polls until `THREE.WebGLRenderer` exists (fixes stuck promise when `load` already fired from cache), **pixel ratio ≤ 2**, init + **`render`** in **try/catch** (avoids crash on lost context). **`VelorIntro`**: `pageshow` + **`persisted`** bumps **`shaderBootId`** so **ShaderAnimation** remounts after **bfcache**. Intro **sessionStorage** is set **only** after hold completes — refresh before that shows intro again.
+
 ## lightweight-charts v5 markers
 
 `ISeriesApi` for candlesticks no longer exposes `setMarkers`. Use `createSeriesMarkers(series, markers)` and call `detach()` on the returned plugin in the chart cleanup effect.

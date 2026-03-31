@@ -1,7 +1,3 @@
--SHADER INTRO ANIMATION- 
-
-Bunu ayrı route/page olarak yapma. Mevcut ana sayfanın üstünde çalışan intro overlay olarak yap!
-
 You are given a task to integrate an existing React component in the codebase
 
 The codebase should support:
@@ -15,26 +11,80 @@ Determine the default path for components and styles.
 If default path for components is not /components/ui, provide instructions on why it's important to create this folder
 Copy-paste this component to /components/ui folder:
 ```tsx
-shader-animation.tsx
+shader-lines.tsx
 "use client"
 
 import { useEffect, useRef } from "react"
-import * as THREE from "three"
+
+declare global {
+  interface Window {
+    THREE: any
+  }
+}
 
 export function ShaderAnimation() {
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<{
-    camera: THREE.Camera
-    scene: THREE.Scene
-    renderer: THREE.WebGLRenderer
+    camera: any
+    scene: any
+    renderer: any
     uniforms: any
-    animationId: number
-  } | null>(null)
+    animationId: number | null
+  }>({
+    camera: null,
+    scene: null,
+    renderer: null,
+    uniforms: null,
+    animationId: null,
+  })
 
   useEffect(() => {
-    if (!containerRef.current) return
+    // Load Three.js dynamically
+    const script = document.createElement("script")
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/89/three.min.js"
+    script.onload = () => {
+      if (containerRef.current && window.THREE) {
+        initThreeJS()
+      }
+    }
+    document.head.appendChild(script)
 
+    return () => {
+      // Cleanup
+      if (sceneRef.current.animationId) {
+        cancelAnimationFrame(sceneRef.current.animationId)
+      }
+      if (sceneRef.current.renderer) {
+        sceneRef.current.renderer.dispose()
+      }
+      document.head.removeChild(script)
+    }
+  }, [])
+
+  const initThreeJS = () => {
+    if (!containerRef.current || !window.THREE) return
+
+    const THREE = window.THREE
     const container = containerRef.current
+
+    // Clear any existing content
+    container.innerHTML = ""
+
+    // Initialize camera
+    const camera = new THREE.Camera()
+    camera.position.z = 1
+
+    // Initialize scene
+    const scene = new THREE.Scene()
+
+    // Create geometry
+    const geometry = new THREE.PlaneBufferGeometry(2, 2)
+
+    // Define uniforms
+    const uniforms = {
+      time: { type: "f", value: 1.0 },
+      resolution: { type: "v2", value: new THREE.Vector2() },
+    }
 
     // Vertex shader
     const vertexShader = `
@@ -51,134 +101,108 @@ export function ShaderAnimation() {
       precision highp float;
       uniform vec2 resolution;
       uniform float time;
+        
+      float random (in float x) {
+          return fract(sin(x)*1e4);
+      }
+      float random (vec2 st) {
+          return fract(sin(dot(st.xy,
+                               vec2(12.9898,78.233)))*
+              43758.5453123);
+      }
+      
+      varying vec2 vUv;
 
       void main(void) {
         vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
-        float t = time*0.05;
-        float lineWidth = 0.002;
+        
+        vec2 fMosaicScal = vec2(4.0, 2.0);
+        vec2 vScreenSize = vec2(256,256);
+        uv.x = floor(uv.x * vScreenSize.x / fMosaicScal.x) / (vScreenSize.x / fMosaicScal.x);
+        uv.y = floor(uv.y * vScreenSize.y / fMosaicScal.y) / (vScreenSize.y / fMosaicScal.y);       
+          
+        float t = time*0.06+random(uv.x)*0.4;
+        float lineWidth = 0.0008;
 
         vec3 color = vec3(0.0);
         for(int j = 0; j < 3; j++){
           for(int i=0; i < 5; i++){
-            color[j] += lineWidth*float(i*i) / abs(fract(t - 0.01*float(j)+float(i)*0.01)*5.0 - length(uv) + mod(uv.x+uv.y, 0.2));
+            color[j] += lineWidth*float(i*i) / abs(fract(t - 0.01*float(j)+float(i)*0.01)*1.0 - length(uv));        
           }
         }
-        
-        gl_FragColor = vec4(color[0],color[1],color[2],1.0);
+
+        gl_FragColor = vec4(color[2],color[1],color[0],1.0);
       }
     `
 
-    // Initialize Three.js scene
-    const camera = new THREE.Camera()
-    camera.position.z = 1
-
-    const scene = new THREE.Scene()
-    const geometry = new THREE.PlaneGeometry(2, 2)
-
-    const uniforms = {
-      time: { type: "f", value: 1.0 },
-      resolution: { type: "v2", value: new THREE.Vector2() },
-    }
-
+    // Create material
     const material = new THREE.ShaderMaterial({
       uniforms: uniforms,
       vertexShader: vertexShader,
       fragmentShader: fragmentShader,
     })
 
+    // Create mesh and add to scene
     const mesh = new THREE.Mesh(geometry, material)
     scene.add(mesh)
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    // Initialize renderer
+    const renderer = new THREE.WebGLRenderer()
     renderer.setPixelRatio(window.devicePixelRatio)
-
     container.appendChild(renderer.domElement)
 
-    // Handle window resize
-    const onWindowResize = () => {
-      const width = container.clientWidth
-      const height = container.clientHeight
-      renderer.setSize(width, height)
-      uniforms.resolution.value.x = renderer.domElement.width
-      uniforms.resolution.value.y = renderer.domElement.height
-    }
-
-    // Initial resize
-    onWindowResize()
-    window.addEventListener("resize", onWindowResize, false)
-
-    // Animation loop
-    const animate = () => {
-      const animationId = requestAnimationFrame(animate)
-      uniforms.time.value += 0.05
-      renderer.render(scene, camera)
-
-      if (sceneRef.current) {
-        sceneRef.current.animationId = animationId
-      }
-    }
-
-    // Store scene references for cleanup
+    // Store references
     sceneRef.current = {
       camera,
       scene,
       renderer,
       uniforms,
-      animationId: 0,
+      animationId: null,
     }
 
-    // Start animation
+    // Handle resize
+    const onWindowResize = () => {
+      const rect = container.getBoundingClientRect()
+      renderer.setSize(rect.width, rect.height)
+      uniforms.resolution.value.x = renderer.domElement.width
+      uniforms.resolution.value.y = renderer.domElement.height
+    }
+
+    onWindowResize()
+    window.addEventListener("resize", onWindowResize, false)
+
+    // Animation loop
+    const animate = () => {
+      sceneRef.current.animationId = requestAnimationFrame(animate)
+      uniforms.time.value += 0.05
+      renderer.render(scene, camera)
+    }
+
     animate()
-
-    // Cleanup function
-    return () => {
-      window.removeEventListener("resize", onWindowResize)
-
-      if (sceneRef.current) {
-        cancelAnimationFrame(sceneRef.current.animationId)
-
-        if (container && sceneRef.current.renderer.domElement) {
-          container.removeChild(sceneRef.current.renderer.domElement)
-        }
-
-        sceneRef.current.renderer.dispose()
-        geometry.dispose()
-        material.dispose()
-      }
-    }
-  }, [])
+  }
 
   return (
     <div
       ref={containerRef}
-      className="w-full h-screen"
-      style={{
-        background: "#000",
-        overflow: "hidden",
-      }}
+      className="w-full h-full absolute" 
     />
   )
 }
 
 
 demo.tsx
-import { ShaderAnimation } from "@/components/ui/shader-animation";
+import { ShaderAnimation } from "@/components/ui/shader-lines";
 
 export default function DemoOne() {
   return (
-    <div className="relative flex h-[650px] w-full flex-col items-center justify-center overflow-hidden rounded-xl border bg-blue-700">
+    <div className="relative flex h-[650px] w-full flex-col items-center justify-center overflow-hidden rounded-xl">
       <ShaderAnimation/>
-      <span className="absolute pointer-events-none z-10 text-center text-7xl leading-none font-semibold tracking-tighter whitespace-pre-wrap text-white">
-        Shader Animation
+      <span className="pointer-events-none z-10 text-center text-7xl leading-none font-semibold tracking-tighter whitespace-pre-wrap text-white">
+        Shader Lines
       </span>
     </div>
   )
 }
-```
-
-Install NPM dependencies:
-```bash
-three
 ```
 
 Implementation Guidelines
