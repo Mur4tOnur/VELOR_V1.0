@@ -8,8 +8,10 @@ const NAV_LINKS = [
   { href: "#features", label: "Features" },
   { href: "#how-it-works", label: "How it works" },
   { href: "#testimonials", label: "Testimonials" },
-  { href: "#about", label: "About us" },
-  { href: "#services", label: "Services" },
+  { href: "#pricing", label: "Pricing" },
+  { href: "#faq", label: "FAQ" },
+  { href: "#final-cta", label: "Get started" },
+  { href: "#footer", label: "Footer" },
 ] as const;
 
 type LandingNavOverlayProps = {

@@ -40,7 +40,7 @@ const FEATURE_ITEMS: FeatureItem[] = [
     icon: Activity,
     title: "Indicator Engine",
     description:
-      "Multi-timeframe context, exhaustion markers, and clean chart overlays in one place.",
+      "Detect stretched, overheated, discounted, and value conditions with VELOR’s market context engine.",
     darkSrc:
       "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1207&h=929&q=80",
     lightSrc:
@@ -50,9 +50,9 @@ const FEATURE_ITEMS: FeatureItem[] = [
   {
     variant: "gauge",
     icon: Gauge,
-    title: "Fear and Greed",
+    title: "Fear & Greed",
     description:
-      "Composite sentiment mock (0–100). Illustrative only—not a live data feed.",
+      "Track sentiment and emotional extremes with a clean market mood layer built for fast context.",
     indexValue: 62,
   },
   {
@@ -60,13 +60,12 @@ const FEATURE_ITEMS: FeatureItem[] = [
     icon: Bell,
     title: "Smart Alerts",
     description:
-      "Tier-style tags for discount, value, fade, and exhaustion—mock examples below.",
+      "Surface FADE, OVERHEAT, DISCOUNT, and VALUE conditions without drowning in noisy signals.",
     alerts: [
       { symbol: "BTC", label: "DISCOUNT", tone: "bull" },
-      { symbol: "NQ", label: "VALUE (BULLISH)", tone: "bull" },
-      { symbol: "EURUSD", label: "FADE", tone: "fade" },
-      { symbol: "USDJPY", label: "EXHAUSTED (BEARISH)", tone: "bear" },
-      { symbol: "ETH", label: "VALUE (BULLISH)", tone: "bull" },
+      { symbol: "ETH", label: "VALUE", tone: "bull" },
+      { symbol: "NQ", label: "FADE", tone: "fade" },
+      { symbol: "SPX", label: "OVERHEAT", tone: "bear" },
     ],
   },
   {
@@ -74,7 +73,7 @@ const FEATURE_ITEMS: FeatureItem[] = [
     icon: ShieldAlert,
     title: "Portfolio Risk",
     description:
-      "Exposure, concentration, and drawdown framing so size and survival stay intentional.",
+      "See allocation, concentration, and cash exposure in one place so every position stays intentional.",
     darkSrc:
       "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&w=1207&h=929&q=80",
     lightSrc:

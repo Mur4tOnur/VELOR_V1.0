@@ -20,6 +20,8 @@ const config: Config = {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
       },
       borderRadius: {
         lg: "var(--radius)",

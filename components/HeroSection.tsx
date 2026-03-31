@@ -1,9 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import { LandingNavOverlay } from "@/components/LandingNavOverlay";
+import { LANDING_HUD_TOP_PADDING_CLASS } from "@/lib/landing-hud-layout";
 
 const HERO_CURRENCIES: { code: string; symbol: string }[] = [
   { code: "EUR", symbol: "€" },
@@ -61,12 +60,42 @@ function isSplineCodeSceneUrl(url: string) {
   return url.includes("scene.splinecode");
 }
 
+/** Reject dangerous schemes (e.g. javascript:) if env is ever mis-set. */
+function isSafeSceneUrl(url: string): boolean {
+  try {
+    const u = new URL(url);
+    if (u.protocol === "https:") return true;
+    if (process.env.NODE_ENV === "development" && u.protocol === "http:") {
+      return u.hostname === "localhost" || u.hostname === "127.0.0.1";
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * `NEXT_PUBLIC_SPLINE_SCENE_URL`: use the **.splinecode** public URL from Spline (loaded via
  * `@splinetool/react-spline`), or any **https** embed page URL for a plain iframe.
  */
 function SplineStage() {
   const url = process.env.NEXT_PUBLIC_SPLINE_SCENE_URL?.trim();
+
+  if (url && !isSafeSceneUrl(url)) {
+    return (
+      <div
+        className="flex h-full w-full items-center justify-center bg-gradient-to-br from-white/[0.04] via-transparent to-cyan-500/[0.06] ring-1 ring-inset ring-white/[0.08]"
+        aria-hidden
+      >
+        <p className="max-w-[14rem] px-2 text-center text-[11px] uppercase tracking-[0.2em] text-zinc-500">
+          Invalid scene URL
+          <span className="mt-2 block font-normal normal-case tracking-normal text-zinc-600">
+            Use an https:// URL in NEXT_PUBLIC_SPLINE_SCENE_URL
+          </span>
+        </p>
+      </div>
+    );
+  }
 
   if (url) {
     if (isSplineCodeSceneUrl(url)) {
@@ -107,16 +136,12 @@ function SplineStage() {
 }
 
 export function HeroSection() {
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
-    <>
-      <LandingNavOverlay open={menuOpen} onClose={() => setMenuOpen(false)} />
-      <section
-        id="hero"
-        className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-black text-white"
-        aria-labelledby="hero-title"
-      >
+    <section
+      id="hero"
+      className={`relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-black text-white ${LANDING_HUD_TOP_PADDING_CLASS}`}
+      aria-labelledby="hero-title"
+    >
         {/* Prism / light rays */}
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           <div
@@ -156,45 +181,7 @@ export function HeroSection() {
           aria-hidden
         />
 
-        <header className="relative z-30 grid w-full shrink-0 grid-cols-[minmax(0,auto)_minmax(0,1fr)_minmax(0,auto)] items-center gap-2 px-4 py-4 sm:gap-3 sm:px-8 sm:py-6">
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            className="inline-flex shrink-0 items-center gap-2 justify-self-start rounded-full border border-white/80 bg-black/20 px-3 py-2 text-[9px] font-medium uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/5 sm:px-4 sm:text-[10px] sm:tracking-[0.18em]"
-            aria-expanded={menuOpen}
-            aria-haspopup="dialog"
-          >
-            <span className="flex flex-col gap-0.5" aria-hidden>
-              <span className="block h-px w-3.5 bg-white sm:w-4" />
-              <span className="block h-px w-3.5 bg-white sm:w-4" />
-            </span>
-            <span className="max-[360px]:sr-only">Menu</span>
-          </button>
-
-          <Link
-            href="/"
-            className="min-w-0 justify-self-center truncate text-center text-sm font-bold uppercase tracking-[0.22em] text-white sm:text-base sm:tracking-[0.28em] md:text-lg"
-          >
-            VELOR
-          </Link>
-
-          <div className="flex shrink-0 flex-nowrap items-center justify-end gap-1.5 justify-self-end sm:gap-2">
-            <Link
-              href="/dashboard"
-              className="whitespace-nowrap rounded-full border border-white/80 bg-black/20 px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/5 sm:px-4 sm:text-[10px] sm:tracking-[0.12em]"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/dashboard"
-              className="whitespace-nowrap rounded-full bg-white px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-black transition-opacity hover:opacity-90 sm:px-5 sm:text-[10px] sm:tracking-[0.12em]"
-            >
-              GET STARTED
-            </Link>
-          </div>
-        </header>
-
-        <div className="relative z-20 flex flex-1 flex-col justify-end px-5 pb-6 pt-4 sm:px-8 sm:pb-10 lg:min-h-0 lg:pb-14 lg:pt-[4.5rem]">
+        <div className="relative z-20 flex flex-1 flex-col justify-end px-5 pb-6 pt-4 sm:px-8 sm:pb-10 lg:min-h-0 lg:pb-14 lg:pt-8">
           <div className="grid max-w-7xl gap-10 lg:mx-auto lg:w-full lg:grid-cols-2 lg:items-end lg:gap-16 xl:max-w-[90rem]">
             <div className="max-w-xl">
               <p className="mb-3 text-[10px] font-medium uppercase leading-relaxed tracking-[0.2em] text-zinc-400 sm:text-[11px] sm:tracking-[0.22em]">
@@ -236,7 +223,6 @@ export function HeroSection() {
           className="pointer-events-none absolute inset-x-0 bottom-0 z-[22] h-32 bg-gradient-to-b from-transparent via-black/70 to-black sm:h-40"
           aria-hidden
         />
-      </section>
-    </>
+    </section>
   );
 }

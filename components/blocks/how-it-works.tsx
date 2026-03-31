@@ -14,19 +14,22 @@ const STEPS: {
 }[] = [
   {
     title: "Detect",
-    subtitle: "Market extremes",
+    subtitle:
+      "VELOR scans for stretched and discounted market conditions across your selected markets.",
     icon: ScanSearch,
     glowColor: "blue",
   },
   {
     title: "Interpret",
-    subtitle: "Clear indicator data",
+    subtitle:
+      "Read clean condition labels like FADE, OVERHEAT, DISCOUNT, and VALUE instead of vague signal noise.",
     icon: LineChart,
     glowColor: "purple",
   },
   {
     title: "Manage",
-    subtitle: "Better decisions, no noise",
+    subtitle:
+      "Review risk, exposure, and broker activity from a single dashboard built for controlled decision-making.",
     icon: SlidersHorizontal,
     glowColor: "green",
   },
@@ -53,7 +56,7 @@ export function HowItWorks() {
               key={title}
               glowColor={glowColor}
               customSize
-              className="min-h-[240px] w-full sm:min-h-[260px] lg:min-h-[280px]"
+              className="min-h-[260px] w-full sm:min-h-[280px] lg:min-h-[320px]"
             >
               <div className="relative z-[1] flex h-full flex-col justify-center gap-6 text-left">
                 <div className="flex items-start gap-4">
