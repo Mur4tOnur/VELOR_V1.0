@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const NAV_LINKS = [
   { href: "#hero", label: "Home" },
@@ -20,6 +23,9 @@ type LandingNavOverlayProps = {
 };
 
 export function LandingNavOverlay({ open, onClose }: LandingNavOverlayProps) {
+  const { user, ready, signOut } = useAuth();
+  const router = useRouter();
+
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -61,21 +67,49 @@ export function LandingNavOverlay({ open, onClose }: LandingNavOverlayProps) {
             {label}
           </Link>
         ))}
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4">
-          <Link
-            href="/dashboard"
-            onClick={onClose}
-            className="rounded-full border border-white/80 bg-transparent px-5 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition-colors hover:bg-white/5"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/dashboard"
-            onClick={onClose}
-            className="rounded-full bg-white px-5 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-black transition-opacity hover:opacity-90"
-          >
-            GET STARTED
-          </Link>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
+          {!ready ? null : user ? (
+            <>
+              <p className="w-full text-sm text-white/60 sm:order-first">
+                Signed in as <span className="font-medium text-white">{user.name}</span>
+              </p>
+              <Link
+                href="/dashboard"
+                onClick={onClose}
+                className="rounded-full border border-white/80 bg-transparent px-5 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition-colors hover:bg-white/5"
+              >
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  signOut();
+                  onClose();
+                  router.push("/");
+                }}
+                className="rounded-full border border-white/25 bg-transparent px-5 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-white/90 transition-colors hover:border-white/40 hover:bg-white/5"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                onClick={onClose}
+                className="rounded-full border border-white/80 bg-transparent px-5 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-white transition-colors hover:bg-white/5"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                onClick={onClose}
+                className="rounded-full bg-white px-5 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.12em] text-black transition-opacity hover:opacity-90"
+              >
+                Get started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
     </div>

@@ -20,7 +20,9 @@ If you see `__webpack_modules__[moduleId] is not a function` on dev, the chart l
 
 ## Routes
 
-**`/`** is landing-only (`HeroSection`). **`/dashboard`** renders `DashboardShell`. Menu item **Dashboard** links to `/dashboard`; hero **Get started** goes to the same route.
+**`/`** is landing-only (`HeroSection`). **`/login`** / **`/signup`** — mock auth UI (`sign-in-card-2` / `sign-up-card-2`, Framer glass card + `AuthBackdrop`). **`/dashboard`** is gated by **`RequireAuth`** (redirect to `/login` if no `velor_session` in `localStorage`); **`DashboardShell`** header: **Home** → `/`, **Log out** clears session → `/`. **`/forgot-password`** — placeholder copy (no real reset; mock auth only).
+
+**`AuthProvider`** (`components/auth/AuthProvider.tsx`): session + **`velor_users`** in `localStorage`; cross-tab sync via **`storage`** event. **Landing HUD / overlay**: logged out → **Login** + **Get started** (`/signup`), no **Dashboard**; logged in → user name + **Dashboard** + **Log out**. **`RedirectIfAuthed`** sends logged-in users away from `/login` and `/signup` to **`/dashboard`**.
 
 ## Hydration vs browser extensions
 

@@ -32,6 +32,55 @@ const testimonials = [
     by: "Mert Y., Position Trader",
     imgSrc: unsplash("photo-1506794778202-cad84cf45f1d"),
   },
+  {
+    tempId: 3,
+    testimonial:
+      "Risk framing finally feels honest—less hype, more context. I use it to sanity-check my sizing before I act.",
+    by: "Selin K., Risk Analyst",
+    imgSrc: unsplash("photo-1494790108377-be9c29b29330"),
+  },
+  {
+    tempId: 4,
+    testimonial:
+      "My swing routine is simpler: one screen for sentiment, structure, and where I might be wrong—not three tabs and a dozen opinions.",
+    by: "Can Ö., Swing Trader",
+    imgSrc: unsplash("photo-1472099645785-5658abf4ff4e"),
+  },
+  {
+    tempId: 5,
+    testimonial:
+      "Reporting for stakeholders used to take forever. Now the story is visual and consistent—still our judgment, just clearer.",
+    by: "Elif S., Family Office Associate",
+    imgSrc: unsplash("photo-1438761681033-6461ffad8d80"),
+  },
+  {
+    tempId: 6,
+    testimonial:
+      "I like that the indicators read like context, not commands. It reduced the urge to overtrade on every flicker.",
+    by: "Barış M., Retail Trader",
+    imgSrc: unsplash("photo-1500648767791-00dcc994a43e"),
+  },
+  {
+    tempId: 7,
+    testimonial:
+      "Long horizon, same emotions. VELOR helps me label regimes and wait—especially when the feed is screaming.",
+    by: "Zeynep D., Long-Term Investor",
+    imgSrc: unsplash("photo-1544725176-7c40e5a71c5e"),
+  },
+  {
+    tempId: 8,
+    testimonial:
+      "Speed matters for me, but so does layout density. This feels built for scanning under pressure without feeling chaotic.",
+    by: "Onur Y., Active Trader",
+    imgSrc: unsplash("photo-1519085360753-af011dbf6a62"),
+  },
+  {
+    tempId: 9,
+    testimonial:
+      "When I explain market backdrops to clients, having one coherent narrative beats juggling five screenshots.",
+    by: "Ayşe N., Wealth Advisor",
+    imgSrc: unsplash("photo-1524504388940-b1c1722653e1"),
+  },
 ];
 
 type LayoutMetrics = {

@@ -1,7 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+import { useAuth } from "@/components/auth/AuthProvider";
 import { FearGreedWidget } from "@/components/FearGreedWidget";
 import { LiquidationHeatMap } from "@/components/LiquidationHeatMap";
 import { PortfolioPie } from "@/components/PortfolioPie";
@@ -48,6 +52,8 @@ const defaultVisible: Record<WidgetKey, boolean> = {
 };
 
 export function DashboardShell() {
+  const { user, signOut } = useAuth();
+  const router = useRouter();
   const [room, setRoom] = useState<RoomId>("overview");
   const [visible, setVisible] = useState<Record<WidgetKey, boolean>>(defaultVisible);
 
@@ -73,7 +79,27 @@ export function DashboardShell() {
         <div className="velor-glass-hud flex w-40 min-w-[10.5rem] max-w-[14rem] shrink-0 items-center border-b border-r px-2 sm:px-3 md:w-56">
           <VelorLogo />
         </div>
-        <div className="velor-glass-hud min-h-14 min-w-0 flex-1 border-b" aria-hidden />
+        <div className="velor-glass-hud flex min-h-14 min-w-0 flex-1 items-center justify-end gap-2 border-b px-2 sm:gap-3 sm:px-4">
+          <span className="hidden max-w-[8rem] truncate text-xs text-zinc-500 sm:inline md:max-w-[12rem]">
+            {user?.name}
+          </span>
+          <Link
+            href="/"
+            className="shrink-0 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-white/90 transition-colors hover:border-white/20 hover:bg-white/[0.07] sm:px-3 sm:text-xs"
+          >
+            Home
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              signOut();
+              router.push("/");
+            }}
+            className="shrink-0 rounded-lg border border-red-500/20 bg-red-950/20 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-red-200/90 transition-colors hover:border-red-400/35 hover:bg-red-950/35 sm:px-3 sm:text-xs"
+          >
+            Log out
+          </button>
+        </div>
       </header>
 
       <div className="flex min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden md:flex-row">

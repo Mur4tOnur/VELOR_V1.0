@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useAuth } from "@/components/auth/AuthProvider";
 import { LandingNavOverlay } from "@/components/LandingNavOverlay";
 import { cn } from "@/lib/utils";
 
@@ -51,13 +52,19 @@ export type LandingHudProps = {
 export function LandingHud({ className, variant = "fixed" }: LandingHudProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const isFixed = variant === "fixed";
+  const { user, ready, signOut } = useAuth();
+  const router = useRouter();
+  const isAuthed = Boolean(ready && user);
 
   return (
     <>
       <LandingNavOverlay open={menuOpen} onClose={() => setMenuOpen(false)} />
       <header
         className={cn(
-          "relative isolate grid w-full shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-x-2 gap-y-2 px-4 py-4 sm:gap-x-3 sm:px-8 sm:py-6",
+          "relative isolate grid w-full shrink-0 items-center gap-x-2 gap-y-2 px-4 py-4 sm:gap-x-3 sm:px-8 sm:py-6",
+          isAuthed
+            ? "max-sm:grid-cols-2 max-sm:grid-rows-[auto_auto] max-sm:gap-y-3 sm:grid-cols-[1fr_auto_1fr]"
+            : "grid-cols-[1fr_auto_1fr]",
           isFixed && "fixed inset-x-0 top-0 z-[70] overflow-visible",
           !isFixed && "relative overflow-visible",
           className,
@@ -89,7 +96,10 @@ export function LandingHud({ className, variant = "fixed" }: LandingHudProps) {
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
-          className="inline-flex min-w-0 shrink-0 items-center gap-2 justify-self-start rounded-full border border-white/80 bg-black/20 px-3 py-2 text-[9px] font-medium uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/5 sm:px-4 sm:text-[10px] sm:tracking-[0.18em]"
+          className={cn(
+            "inline-flex min-w-0 shrink-0 items-center gap-2 justify-self-start rounded-full border border-white/80 bg-black/20 px-3 py-2 text-[9px] font-medium uppercase tracking-[0.16em] text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/5 sm:px-4 sm:text-[10px] sm:tracking-[0.18em]",
+            isAuthed && "max-sm:col-start-1 max-sm:row-start-1 sm:col-auto sm:row-auto",
+          )}
           aria-expanded={menuOpen}
           aria-haspopup="dialog"
         >
@@ -100,23 +110,64 @@ export function LandingHud({ className, variant = "fixed" }: LandingHudProps) {
           <span className="max-[360px]:sr-only">Menu</span>
         </button>
 
-        <div className="flex min-w-0 justify-center justify-self-center px-1">
+        <div
+          className={cn(
+            "relative z-10 flex min-w-0 justify-center justify-self-center px-1",
+            isAuthed &&
+              "max-sm:col-span-2 max-sm:row-start-2 max-sm:w-full max-sm:justify-self-center sm:col-auto sm:col-span-1 sm:row-auto sm:w-auto",
+          )}
+        >
           <HeroBrandMark />
         </div>
 
-        <div className="flex min-w-0 shrink-0 flex-nowrap items-center justify-end justify-self-end gap-1.5 sm:gap-2">
-          <Link
-            href="/dashboard"
-            className="whitespace-nowrap rounded-full border border-white/80 bg-black/20 px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/5 sm:px-4 sm:text-[10px] sm:tracking-[0.12em]"
-          >
-            Dashboard
-          </Link>
-          <Link
-            href="/dashboard"
-            className="whitespace-nowrap rounded-full bg-white px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-black transition-opacity hover:opacity-90 sm:px-5 sm:text-[10px] sm:tracking-[0.12em]"
-          >
-            GET STARTED
-          </Link>
+        <div
+          className={cn(
+            "flex min-w-0 shrink-0 flex-nowrap items-center justify-end justify-self-end gap-1.5 sm:gap-2",
+            isAuthed &&
+              "max-sm:col-start-2 max-sm:row-start-1 max-sm:min-w-0 max-sm:justify-self-end sm:col-auto sm:row-auto",
+          )}
+        >
+          {!ready ? (
+            <span className="h-8 w-16 animate-pulse rounded-full bg-white/10 sm:w-24" aria-hidden />
+          ) : user ? (
+            <>
+              {/* Nickname only from sm+ — mobile shows name in menu overlay to avoid crowding the logo */}
+              <span className="hidden max-w-[9rem] truncate text-[10px] font-medium text-white/70 sm:inline">
+                {user.name}
+              </span>
+              <Link
+                href="/dashboard"
+                className="whitespace-nowrap rounded-full border border-white/80 bg-black/20 px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/5 sm:px-4 sm:text-[10px] sm:tracking-[0.12em]"
+              >
+                Dashboard
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  signOut();
+                  router.push("/");
+                }}
+                className="whitespace-nowrap rounded-full border border-white/25 bg-transparent px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-white/90 backdrop-blur-sm transition-colors hover:border-white/45 hover:bg-white/5 sm:px-4 sm:text-[10px] sm:tracking-[0.12em]"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="whitespace-nowrap rounded-full border border-white/80 bg-black/20 px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-white backdrop-blur-sm transition-colors hover:border-white hover:bg-white/5 sm:px-4 sm:text-[10px] sm:tracking-[0.12em]"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className="whitespace-nowrap rounded-full bg-white px-2.5 py-2 text-[9px] font-semibold uppercase tracking-[0.1em] text-black transition-opacity hover:opacity-90 sm:px-5 sm:text-[10px] sm:tracking-[0.12em]"
+              >
+                Get started
+              </Link>
+            </>
+          )}
         </div>
       </header>
     </>
